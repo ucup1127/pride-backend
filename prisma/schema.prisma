@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  phone     String     @unique
+  name      String?
+  role      String     @default("user")
+  orders    Order[]
+  undangan  Undangan[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([phone, code])
+}
+
+model Template {
+  id       String @id
+  name     String
+  style    String
+  category String
+  tag      String
+  event    String
+  names    String
+  date     String
+  bg       String
+  fg       String
+  undangan Undangan[]
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan       String?
+  templateId String?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+}
+
+model Undangan {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId String
+  template   Template @relation(fields: [templateId], references: [id])
+  judul      String
+  data       Json?
+  status     String   @default("draft")
+  rsvp       Rsvp[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Rsvp {
+  id         String   @id @default(cuid())
+  undanganId String
+  undangan   Undangan @relation(fields: [undanganId], references: [id], onDelete: Cascade)
+  nama       String
+  kehadiran  String
+  jumlah     Int      @default(1)
+  ucapan     String?
+  createdAt  DateTime @default(now())
+}
