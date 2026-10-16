@@ -60,9 +60,12 @@ model Undangan {
   templateId String
   template   Template @relation(fields: [templateId], references: [id])
   judul      String
+  slug       String   @unique
+  isPublic   Boolean  @default(false)
   data       Json?
   status     String   @default("draft")
   rsvp       Rsvp[]
+  guests     Guest[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -76,4 +79,21 @@ model Rsvp {
   jumlah     Int      @default(1)
   ucapan     String?
   createdAt  DateTime @default(now())
+}
+
+model Guest {
+  id         String   @id @default(cuid())
+  undanganId String
+  undangan   Undangan @relation(fields: [undanganId], references: [id], onDelete: Cascade)
+  nama       String
+  slug       String   @unique
+  kategori   String?  // keluarga | teman | kerja | vip
+  telepon    String?
+  jumlah     Int      @default(1)
+  status     String   @default("pending") // pending | hadir | tidak_hadir | ragu
+  catatan    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([undanganId])
 }
