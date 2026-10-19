@@ -10,6 +10,9 @@ export async function sendOtp(req, res, next) {
 
 export async function verifyOtp(req, res, next) {
   try {
+    // Tambahin console.log ini buat ngecek data apa yang masuk dari frontend
+    console.log("DATA MASUK DARI FRONTEND:", req.body); 
+    
     const { phone, code, plan, template } = req.body;
     const result = await authService.verifyOtp(phone, code, { plan, template });
     return ok(res, result, 'Login berhasil');

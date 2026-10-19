@@ -11,7 +11,8 @@ export async function sendOtp(phone) {
   const code = String(crypto.randomInt(100000, 999999));
   const expiresAt = new Date(Date.now() + env.OTP_TTL_MINUTES * 60 * 1000);
   await prisma.otpCode.create({ data: { phone, code, expiresAt } });
-  await sendWhatsappMessage(phone, 'Kode verifikasi Pride kamu: ' + code + '\nBerlaku ' + env.OTP_TTL_MINUTES + ' menit.');
+ const pesan = `*PRIDE STUDIO*\n\nKode verifikasi kamu adalah:\n\n*${code}*\n\nKode ini berlaku selama ${env.OTP_TTL_MINUTES} menit. JANGAN berikan kode ini kepada siapa pun.`;
+await sendWhatsappMessage(phone, pesan);
   return { phone, expiresInMinutes: env.OTP_TTL_MINUTES };
 }
 
