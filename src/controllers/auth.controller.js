@@ -1,20 +1,16 @@
 import * as authService from '../services/auth.service.js';
-import { ok } from '../utils/response.js';
+import { ok, created } from '../utils/response.js';
 
-export async function sendOtp(req, res, next) {
+export async function register(req, res, next) {
   try {
-    const result = await authService.sendOtp(req.body.phone);
-    return ok(res, result, 'Kode verifikasi dikirim');
+    const result = await authService.register(req.body);
+    return created(res, result, 'Registrasi berhasil');
   } catch (e) { next(e); }
 }
 
-export async function verifyOtp(req, res, next) {
+export async function login(req, res, next) {
   try {
-    // Tambahin console.log ini buat ngecek data apa yang masuk dari frontend
-    console.log("DATA MASUK DARI FRONTEND:", req.body); 
-    
-    const { phone, code, plan, template } = req.body;
-    const result = await authService.verifyOtp(phone, code, { plan, template });
+    const result = await authService.login(req.body);
     return ok(res, result, 'Login berhasil');
   } catch (e) { next(e); }
 }

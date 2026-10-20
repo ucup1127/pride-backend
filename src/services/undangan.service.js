@@ -1,4 +1,6 @@
 import { prisma } from '../config/database.js';
+import { uniqueSlug } from '../utils/slug.js'; // <-- Tambahin import ini
+
 const err = (m, s) => Object.assign(new Error(m), { status: s });
 
 export const list = (userId) =>
@@ -11,8 +13,21 @@ export async function detail(id, userId) {
   return item;
 }
 
-export const create = (userId, data) =>
-  prisma.undangan.create({ data: { ...data, userId } });
+export async function create(userId, data) {
+  const slug = data.slug || uniqueSlug(data.judul || 'undangan');
+  
+  return prisma.undangan.create({
+    data: { 
+      judul: data.judul,
+      templateId: data.templateId,
+      slug: slug,
+      isPublic: data.isPublic ?? true,
+      status: data.status || 'draft',
+      data: data.data || {}, // <-- INI PENTING: Simpan data form (nama, tanggal, lokasi)
+      userId,
+    },
+  });
+}
 
 export async function update(id, userId, data) {
   await detail(id, userId);

@@ -48,12 +48,16 @@ export async function create(userId, data) {
 export async function bulkCreate(userId, undanganId, guests) {
   await ensureOwnership(undanganId, userId);
 
+  // Siapin data tamu dengan slug unik
   const data = guests.map((g) => ({
-    ...g,
     undanganId,
-    slug: uniqueSlug(g.nama),
+    nama: g.nama,
+    jumlah: Number(g.jumlah) || 1,
+    slug: uniqueSlug(g.nama), // otomatis bikin slug dari nama
+    status: 'pending',
   }));
 
+  // Simpan ke database
   const result = await prisma.guest.createMany({ data });
   return { count: result.count };
 }

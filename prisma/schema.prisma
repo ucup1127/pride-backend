@@ -10,7 +10,8 @@ datasource db {
 
 model User {
   id        String     @id @default(cuid())
-  phone     String     @unique
+  email     String     @unique
+  password  String
   name      String?
   role      String     @default("user")
   orders    Order[]
@@ -66,6 +67,7 @@ model Undangan {
   status     String   @default("draft")
   rsvp       Rsvp[]
   guests     Guest[]
+  wishes     Wish[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -96,4 +98,14 @@ model Guest {
   updatedAt  DateTime @updatedAt
 
   @@index([undanganId])
+}
+
+model Wish {
+  id         String   @id @default(cuid())
+  undanganId String
+  undangan   Undangan @relation(fields: [undanganId], references: [id], onDelete: Cascade)
+  nama       String
+  kehadiran  String   // hadir | tidak_hadir | ragu
+  ucapan     String
+  createdAt  DateTime @default(now())
 }

@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
-const phoneSchema = z.string().regex(/^8\d{8,12}$/, 'Nomor tidak valid (contoh: 81234567890)');
+export const registerSchema = z.object({
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(6, 'Password minimal 6 karakter'),
+  name: z.string().min(2, 'Nama minimal 2 karakter'),
+});
 
-export const sendOtpSchema = z.object({ phone: phoneSchema });
-
-export const verifyOtpSchema = z.object({
-  phone: phoneSchema,
-  code: z.string().length(6).regex(/^\d+$/, 'Kode harus 6 digit'),
-  plan: z.string().optional(),
-  template: z.string().optional(),
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1, 'Password wajib diisi'),
 });

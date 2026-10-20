@@ -16,3 +16,14 @@ export async function update(req, res, next) {
 export async function remove(req, res, next) {
   try { return ok(res, await undanganService.remove(req.params.id, req.user.sub)); } catch (e) { next(e); }
 }
+export async function detailPublic(req, res, next) {
+  try {
+    // Narik data undangan berdasarkan slug, tanpa cek user
+    const undangan = await prisma.undangan.findUnique({
+      where: { slug: req.params.slug },
+      include: { template: true }
+    });
+    if (!undangan) return res.status(404).json({ success: false, message: 'Undangan tidak ditemukan' });
+    return ok(res, undangan);
+  } catch (e) { next(e); }
+}
