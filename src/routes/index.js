@@ -6,6 +6,8 @@ import undanganRoute from './undangan.route.js';
 import rsvpRoute from './rsvp.route.js';
 import guestRoute from './guest.route.js';
 import wishRoute from './wish.route.js';
+import * as paymentController from '../controllers/payment.controller.js';
+import { requireAuth } from '../middlewares/auth.js';
 
 const router = Router();
 router.use('/health', healthRoute);
@@ -15,4 +17,6 @@ router.use('/undangan', undanganRoute);
 router.use('/rsvp', rsvpRoute);
 router.use('/guests', guestRoute);
 router.use('/wishes', wishRoute);
+router.post('/payment/create', requireAuth, paymentController.createInvoice);
+router.post('/payment/webhook', paymentController.handleWebhook);
 export default router;

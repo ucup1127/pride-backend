@@ -10,3 +10,7 @@ export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1, 'Password wajib diisi'),
 });
+
+export const googleLoginSchema = z.object({
+  credential: z.string().min(1, 'Token Google wajib diisi'),
+});

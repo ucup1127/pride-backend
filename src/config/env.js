@@ -7,12 +7,15 @@ const schema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  GOOGLE_CLIENT_ID: z.string().optional().default(''),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   WHATSAPP_PROVIDER: z.enum(['console', 'custom']).default('console'),
   WHATSAPP_API_URL: z.string().optional().default(''),
   WHATSAPP_API_KEY: z.string().optional().default(''),
   WHATSAPP_SENDER: z.string().optional().default(''),
   OTP_TTL_MINUTES: z.coerce.number().default(5),
+  XENDIT_SECRET_KEY: z.string().optional().default(''),
+  XENDIT_WEBHOOK_TOKEN: z.string().optional().default(''),
 });
 
 const parsed = schema.safeParse(process.env);

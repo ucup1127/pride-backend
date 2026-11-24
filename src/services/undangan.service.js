@@ -21,9 +21,9 @@ export async function create(userId, data) {
       judul: data.judul,
       templateId: data.templateId,
       slug: slug,
-      isPublic: data.isPublic ?? true,
-      status: data.status || 'draft',
-      data: data.data || {}, // <-- INI PENTING: Simpan data form (nama, tanggal, lokasi)
+      isPublic: false, // <-- PASTIKAN FALSE (Belum Publik)
+      status: 'draft', // <-- PASTIKAN DRAFT (Belum Bayar)
+      data: data.data || {},
       userId,
     },
   });

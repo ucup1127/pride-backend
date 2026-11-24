@@ -3,14 +3,13 @@ import { uniqueSlug } from '../utils/slug.js';
 
 const err = (msg, status) => Object.assign(new Error(msg), { status });
 
-/** Pastikan undangan milik user ini */
 async function ensureOwnership(undanganId, userId) {
   const u = await prisma.undangan.findUnique({ where: { id: undanganId } });
   if (!u) throw err('Undangan tidak ditemukan', 404);
   if (u.userId !== userId) throw err('Akses ditolak', 403);
+
   return u;
 }
-
 /** List semua tamu untuk satu undangan */
 export async function list(userId, undanganId) {
   await ensureOwnership(undanganId, userId);
@@ -22,6 +21,7 @@ export async function list(userId, undanganId) {
 
 /** Detail tamu berdasarkan slug (publik) */
 export async function findBySlug(slug) {
+  // 1. Coba cari di tabel Guest (link personal tamu)
   const guest = await prisma.guest.findUnique({
     where: { slug },
     include: {
@@ -30,9 +30,35 @@ export async function findBySlug(slug) {
       },
     },
   });
-  if (!guest) throw err('Tamu tidak ditemukan', 404);
-  if (!guest.undangan.isPublic) throw err('Undangan belum dipublikasikan', 403);
-  return guest;
+
+  if (guest) {
+    if (!guest.undangan.isPublic || guest.undangan.status !== 'published') {
+      throw err('Undangan ini masih dalam status DRAFT. Silakan selesaikan pembayaran.', 403);
+    }
+    return guest;
+  }
+
+  // 2. Kalau gak ketemu di Guest, coba cari di tabel Undangan (link utama)
+  const undangan = await prisma.undangan.findUnique({
+    where: { slug },
+    include: { template: true },
+  });
+
+  if (undangan) {
+    if (!undangan.isPublic || undangan.status !== 'published') {
+      throw err('Undangan ini masih dalam status DRAFT. Silakan selesaikan pembayaran.', 403);
+    }
+
+    // Kembalikan format yang mirip Guest, biar frontend gak bingung
+    return {
+      nama: '[Nama Tamu]', // Default kalau buka link utama
+      undanganId: undangan.id,
+      undangan: undangan,
+    };
+  }
+
+  // 3. Kalau dua-duanya gak ketemu
+  throw err('Undangan atau Tamu tidak ditemukan', 404);
 }
 
 /** Tambah tamu baru */
@@ -52,6 +78,8 @@ export async function bulkCreate(userId, undanganId, guests) {
   const data = guests.map((g) => ({
     undanganId,
     nama: g.nama,
+    kategori: g.kategori,
+    telepon: g.telepon,
     jumlah: Number(g.jumlah) || 1,
     slug: uniqueSlug(g.nama), // otomatis bikin slug dari nama
     status: 'pending',

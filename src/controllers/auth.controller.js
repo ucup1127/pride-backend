@@ -15,6 +15,13 @@ export async function login(req, res, next) {
   } catch (e) { next(e); }
 }
 
+export async function googleLogin(req, res, next) {
+  try {
+    const result = await authService.googleLogin(req.body.credential);
+    return ok(res, result, 'Login Google berhasil');
+  } catch (e) { next(e); }
+}
+
 export async function me(req, res, next) {
   try { return ok(res, await authService.getProfile(req.user.sub)); }
   catch (e) { next(e); }
