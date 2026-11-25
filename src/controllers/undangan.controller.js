@@ -17,6 +17,9 @@ export async function update(req, res, next) {
 export async function remove(req, res, next) {
   try { return ok(res, await undanganService.remove(req.params.id, req.user.sub)); } catch (e) { next(e); }
 }
+export async function publish(req, res, next) {
+  try { return ok(res, await undanganService.publish(req.params.id, req.user.sub), 'Undangan dipublikasikan'); } catch (e) { next(e); }
+}
 export async function detailPublic(req, res, next) {
   try {
     const undangan = await prisma.undangan.findUnique({
@@ -33,6 +36,12 @@ export async function detailPublic(req, res, next) {
       return res.status(403).json({
         success: false,
         message: 'Undangan ini masih dalam status DRAFT. Silakan selesaikan pembayaran.'
+      });
+    }
+    if (undangan.expiresAt && undangan.expiresAt <= new Date()) {
+      return res.status(410).json({
+        success: false,
+        message: 'Masa aktif undangan telah berakhir.',
       });
     }
 

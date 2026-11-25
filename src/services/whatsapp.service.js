@@ -1,11 +1,20 @@
 import { env } from '../config/env.js';
 import { info, warn } from '../utils/logger.js';
 
+function formatWhatsappNumber(phone) {
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.startsWith('0')) return `62${digits.slice(1)}`;
+  if (digits.startsWith('62')) return digits;
+  return `62${digits}`;
+}
+
 export async function sendWhatsappMessage(phone, message) {
+  const target = formatWhatsappNumber(phone);
+
   // Kalau lagi mode console (development), munculin di terminal aja
   if (env.WHATSAPP_PROVIDER === 'console' || !env.WHATSAPP_API_URL) {
-    info(`[SIMULASI WA -> +62${phone}] ${message}`);
-    return { delivered: true, provider: 'console' };
+    info(`[SIMULASI WA -> +${target}] ${message}`);
+    return { delivered: false, provider: 'console', simulated: true };
   }
 
   // Kalau mode custom (Fonnte), nembak API beneran
@@ -17,7 +26,7 @@ export async function sendWhatsappMessage(phone, message) {
         ...(env.WHATSAPP_API_KEY ? { Authorization: env.WHATSAPP_API_KEY } : {}),
       },
       body: JSON.stringify({
-        target: `62${phone}`, // Fonnte minta format 62xxxx
+        target,
         message: message,
       }),
     });

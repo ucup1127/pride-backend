@@ -30,7 +30,7 @@ export async function register({ email, password, name }) {
     data: { email, password: hash, name },
     select: { id: true, email: true, name: true, role: true },
   });
-  return user;
+  return createSession(user);
 }
 
 export async function login({ email, password }) {

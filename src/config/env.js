@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+const paymentSetting = (fallback) =>
+  z.string().default(fallback).transform((value) => value.trim() || fallback);
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(3000),
@@ -16,6 +19,13 @@ const schema = z.object({
   OTP_TTL_MINUTES: z.coerce.number().default(5),
   XENDIT_SECRET_KEY: z.string().optional().default(''),
   XENDIT_WEBHOOK_TOKEN: z.string().optional().default(''),
+  // The bank number remains a visibly marked dummy until an active account is provided.
+  PAYMENT_BANK_NAME: paymentSetting('SeaBank'),
+  PAYMENT_BANK_ACCOUNT_NUMBER: paymentSetting('0000000000'),
+  PAYMENT_BANK_ACCOUNT_HOLDER: paymentSetting('Luthfi Yusuf'),
+  PAYMENT_EWALLET_NAME: paymentSetting('DANA'),
+  PAYMENT_EWALLET_NUMBER: paymentSetting('081225367526'),
+  PAYMENT_EWALLET_ACCOUNT_HOLDER: paymentSetting('Luthfi Yusuf'),
 });
 
 const parsed = schema.safeParse(process.env);

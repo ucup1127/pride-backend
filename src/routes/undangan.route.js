@@ -9,6 +9,7 @@ router.get('/',       requireAuth, undanganController.list);
 router.get('/:id',    requireAuth, undanganController.detail);
 router.post('/',      requireAuth, validate(createUndanganSchema), undanganController.create);
 router.put('/:id',    requireAuth, validate(updateUndanganSchema), undanganController.update);
+router.post('/:id/publish', requireAuth, undanganController.publish);
 router.delete('/:id', requireAuth, undanganController.remove);
 router.get('/public/:slug', undanganController.detailPublic);
 export default router;

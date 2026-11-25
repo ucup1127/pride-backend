@@ -9,7 +9,18 @@ import { notFound } from './middlewares/notFound.js';
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+app.use(cors({
+  origin(origin, callback) {
+    const isLocalDevelopmentOrigin =
+      env.NODE_ENV !== 'production'
+      && /^http:\/\/(?:localhost|127\.0\.0\.1):\d+$/.test(origin || '');
+    if (!origin || origin === env.CORS_ORIGIN || isLocalDevelopmentOrigin) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} tidak diizinkan oleh CORS.`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 app.use('/api', routes);

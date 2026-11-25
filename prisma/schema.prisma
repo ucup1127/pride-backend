@@ -45,19 +45,39 @@ model Template {
 }
 
 model Order {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan       String?
-  templateId String?
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+  id                 String     @id @default(cuid())
+  userId             String
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan               String?
+  templateId         String?
+  amount             Int        @default(0)
+  publishedCount     Int        @default(0)
+  paymentMethod      String?
+  contactPhone       String?
+  transferAmount     Int?
+  transferSenderName String?
+  transferReference  String?
+  transferDate       DateTime?
+  status             String     @default("pending")
+  expiresAt          DateTime?
+  paidAt             DateTime?
+  reviewedAt         DateTime?
+  reviewedBy         String?
+  refundAmount       Int?
+  adminFee           Int?
+  reviewNote         String?
+  undangan           Undangan[]
+  createdAt          DateTime   @default(now())
+
+  @@index([userId, status, createdAt])
 }
 
 model Undangan {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   templateId String
   template   Template @relation(fields: [templateId], references: [id])
   judul      String
@@ -65,11 +85,15 @@ model Undangan {
   isPublic   Boolean  @default(false)
   data       Json?
   status     String   @default("draft")
+  publishedAt DateTime?
+  expiresAt  DateTime?
   rsvp       Rsvp[]
   guests     Guest[]
   wishes     Wish[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([orderId])
 }
 
 model Rsvp {

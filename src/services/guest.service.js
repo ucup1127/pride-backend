@@ -3,6 +3,15 @@ import { uniqueSlug } from '../utils/slug.js';
 
 const err = (msg, status) => Object.assign(new Error(msg), { status });
 
+function ensureInvitationAvailable(undangan) {
+  if (!undangan.isPublic || undangan.status !== 'published') {
+    throw err('Undangan ini masih dalam status DRAFT.', 403);
+  }
+  if (undangan.expiresAt && undangan.expiresAt <= new Date()) {
+    throw err('Masa aktif undangan telah berakhir.', 410);
+  }
+}
+
 async function ensureOwnership(undanganId, userId) {
   const u = await prisma.undangan.findUnique({ where: { id: undanganId } });
   if (!u) throw err('Undangan tidak ditemukan', 404);
@@ -32,9 +41,7 @@ export async function findBySlug(slug) {
   });
 
   if (guest) {
-    if (!guest.undangan.isPublic || guest.undangan.status !== 'published') {
-      throw err('Undangan ini masih dalam status DRAFT. Silakan selesaikan pembayaran.', 403);
-    }
+    ensureInvitationAvailable(guest.undangan);
     return guest;
   }
 
@@ -45,9 +52,7 @@ export async function findBySlug(slug) {
   });
 
   if (undangan) {
-    if (!undangan.isPublic || undangan.status !== 'published') {
-      throw err('Undangan ini masih dalam status DRAFT. Silakan selesaikan pembayaran.', 403);
-    }
+    ensureInvitationAvailable(undangan);
 
     // Kembalikan format yang mirip Guest, biar frontend gak bingung
     return {
@@ -121,8 +126,12 @@ export async function stats(userId, undanganId) {
 
 /** RSVP publik lewat slug tamu */
 export async function rsvpBySlug({ slug, kehadiran, jumlah, ucapan }) {
-  const guest = await prisma.guest.findUnique({ where: { slug } });
+  const guest = await prisma.guest.findUnique({
+    where: { slug },
+    include: { undangan: true },
+  });
   if (!guest) throw err('Tamu tidak ditemukan', 404);
+  ensureInvitationAvailable(guest.undangan);
 
   const updated = await prisma.guest.update({
     where: { id: guest.id },
